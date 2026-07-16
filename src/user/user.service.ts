@@ -7,29 +7,30 @@ import { MongoServerError } from 'mongodb';
 
 @Injectable()
 export class UserService {
-  constructor(@InjectModel(User.name) private userModel: Model<User>){}
+  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
   async createUser(registerUserDto: RegisterDto) {
     try {
-    return await this.userModel.create({
-      fname: registerUserDto.fname,
-      lname: registerUserDto.lname,
-      email: registerUserDto.email,
-      password: registerUserDto.password,
-      
-    });
-  } catch (error) {
-    const DUPLICATE_KEY_ERROR_CODE = 11000;
-     if (error instanceof MongoServerError && error.code === DUPLICATE_KEY_ERROR_CODE) {
+      return await this.userModel.create({
+        fname: registerUserDto.fname,
+        lname: registerUserDto.lname,
+        email: registerUserDto.email,
+        password: registerUserDto.password,
+      });
+    } catch (error) {
+      const DUPLICATE_KEY_ERROR_CODE = 11000;
+      if (
+        error instanceof MongoServerError &&
+        error.code === DUPLICATE_KEY_ERROR_CODE
+      ) {
         const [field, value] = Object.entries(error.keyValue)[0];
 
-        throw new ConflictException(
-          `${field} '${value}' already exists`,
-        );
+        throw new ConflictException(`${field} '${value}' already exists`);
       }
-      throw error; 
-    
+      throw error;
+    }
   }
-    
+  async findByEmail(email: string) {
+    return await this.userModel.findOne({ email });
   }
 }
