@@ -13,7 +13,7 @@ export class AuthService {
   async registerUser(registerUserDto: RegisterDto) {
     const hash = await bcrypt.hash(registerUserDto.password, 10);
     const user = await this.userService.createUser({...registerUserDto, password: hash });
-    const payload = { sub: user._id };
+    const payload = { sub: user._id, role: user.role };
     const token = await this.jwtService.signAsync(payload);
     return  {accessToken: token};
   }
@@ -26,7 +26,7 @@ export class AuthService {
     if (!isMatch) {
       throw new Error('Invalid credentials');
     }
-    const token = await this.jwtService.signAsync({ sub: user._id });
+    const token = await this.jwtService.signAsync({ sub: user._id, role: user.role });
     return { accessToken: token };
   }
 }
